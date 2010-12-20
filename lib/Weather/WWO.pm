@@ -1,18 +1,32 @@
 package Weather::WWO;
 use Moose;
 use namespace::autoclean;
+use Weather::WWO::Types;
 use LWP::Simple;
 use JSON;
-use Regexp::Common qw/ zip net /;
 
 use Data::Dumper::Concise;
 
+our $VERSION = '0.01';
+
+=head1 Name
+
+Weather::WWO - API to World Weather Online
+
 =head1 Synopsis
 
-my $wwo = Weather::WWO->new( api_key        => $my_api_key,
-                             zip            => 47401,
-                             units          => 'F',);
-my ($highs, $lows) = $wwo->forecast_temp_by_zip;
+my $wwo = Weather::WWO->new( api_key           => $my_api_key,
+                             location          => $location,
+                             temperature_units => 'F',
+                             wind_units        => 'Miles');
+Where the $location can be:
+* zip code
+* IP address
+* latitude,longitude
+
+my ($highs, $lows) = $wwo->forecast_temperatures;
+
+NOTE: api_key and location are required parameters to new()
 
 =cut
 
@@ -21,124 +35,132 @@ has 'api_key' => (
     isa      => 'Str',
     required => 1,
 );
-has 'source_URL' => (
-    is         => 'ro',
-    isa        => 'Any',
-    lazy_build => 1,
+has 'location' => (
+    is       => 'rw',
+    isa      => 'Location',
+    required => 1,
+    writer   => 'set_location',
 );
 has 'num_of_days' => (
     is        => 'ro',
     isa       => 'Int',
     'default' => 5,
 );
+
+# We are only using the JSON format
 has 'format' => (
     is        => 'ro',
     isa       => 'Str',
     'default' => 'json',
+    init_arg  => undef,
 );
-has 'zip' => (
-    is  => 'ro',
-    isa => 'Str',
-);
-has 'units' => (
+has 'temperature_units' => (
     is        => 'ro',
     isa       => 'Str',
-    'default' => 'F',
+    'default' => 'C',
+);
+has 'wind_units' => (
+    is        => 'ro',
+    isa       => 'Str',
+    'default' => 'Kmph',
 );
 has 'data' => (
-    is         => 'ro',
+    is         => 'rw',
     isa        => 'HashRef',
     lazy_build => 1,
 );
-has 'current_conditions' => (
+has 'source_URL' => (
     is         => 'ro',
-    isa        => 'ArrayRef[HashRef]',
-    lazy_build => 1,
-);
-has 'weather_forecast' => (
-    is         => 'ro',
-    isa        => 'ArrayRef[HashRef]',
-    lazy_build => 1,
-);
-has 'request' => (
-    is         => 'ro',
-    isa        => 'ArrayRef[HashRef]',
-    lazy_build => 1,
-);
-has 'query' => (
-    is => 'ro',
-    isa => 'Str',
-    lazy_build => 1,
-);
-has 'query_type' => (
-    is => 'ro',
-    isa => 'Str',
+    isa        => 'Any',
     lazy_build => 1,
 );
 
-sub _build_query_type {
+# When the location changes, we want to clear the data to insure a new data fetch will happen.
+# We need this since data is lazily built, and we used a distinct name for the writer
+# so we only clear data when we set the location anytime after initial object construction.
+after 'set_location' => sub {
     my $self = shift;
+    $self->clear_data;
+};
 
-    # Are we an IP address (v4)
-    if ( $self->query =~ /$RE{net}{IPv4}/ ) {
-        return 'IP';
-    }
-    elsif ( $self->query =~ /$RE{zip}{US}{-extended => 'no'}/ ) {
-        return 'zip';
-    }
-    elsif ( $self->is_lat_long_query ) {
-        return 'lat/long';
-    }
-}
 
-sub is_lat_long_query {
-    my ($self, $lat, $long) = @_;
-    return;
-}
+=head2 forecast_temperatures
 
-sub forecast_temp_by_zip {
-    my ($self) = @_;
+Get the high and low temperatures for the number of days specified.
 
-    my $forecast = $self->weather_forecast;
-    my $high_key = 'tempMax' . $self->units;
-    my $low_key  = 'tempMin' . $self->units;
-    my @highs    = map { $_->{$high_key} } @{$forecast};
-    my @lows     = map { $_->{$low_key} } @{$forecast};
+    Returns: Array of two ArrayRefs being the high and low temperatures
+    Example: my ($highs, $lows) = $wwo->forecast_temperaures;
 
-    return ( \@highs, \@lows );
-}
+=cut
 
-sub _build_data {
+sub forecast_temperatures {
     my $self = shift;
-
-    my $content = get( $self->query_URL );
-    die "Couldn't get URL: ", $self->query_URL unless defined $content;
-
-    my $data_href = decode_json($content);
-    return $data_href->{data};
+    return ($self->highs, $self->lows);
 }
 
-sub _build_current_conditons {
+=head2 highs
+
+Get an ArrayRef[Int] of the forecasted high temperatures.
+
+=cut
+
+sub highs {
     my $self = shift;
-    return $self->data->{current_condition};
+    
+    my $high_key = 'tempMax' . $self->temperature_units;
+    return $self->get_forecast_data_by_key($high_key);
 }
 
-sub _build_weather_forecast {
+=head2 lows
+
+Get an ArrayRef[Int] of the forecasted low temperatures.
+
+=cut
+
+sub lows {
     my $self = shift;
-    warn Dumper $self->data->{weather}->[0];
-    return $self->data->{weather};
+    
+    my $low_key = 'tempMin' . $self->temperature_units;
+    return $self->get_forecast_data_by_key($low_key);
 }
 
-sub _build_source_URL {
+=head2 winds
+
+Get an ArrayRef[Int] of the forecasted wind speeds.
+
+=cut
+
+sub winds {
     my $self = shift;
-    return 'http://www.worldweatheronline.com/feed/weather.ashx';
+    
+    my $wind_key = 'windspeed' . $self->wind_units;
+    return $self->get_forecast_data_by_key($wind_key);
 }
+
+=head2 get_forecast_data_by_key
+
+Get the values for a single forecast metric.
+Examples are: tempMinF, tempMaxC, windspeedMiles etc...
+
+=cut
+
+sub get_forecast_data_by_key {
+    my ($self, $key) = @_;
+    
+    return [ map { $_->{$key} } @{$self->weather_forecast} ];
+}
+
+=head2 query_string
+
+Construct the query string based on object attributes.
+
+=cut
 
 sub query_string {
     my $self = shift;
 
     my $query_pieces = {
-        q           => $self->zip,
+        q           => $self->location,
         format      => $self->format,
         num_of_days => $self->num_of_days,
         key         => $self->api_key,
@@ -151,11 +173,64 @@ sub query_string {
     return $query_string;
 }
 
+=head2 query_URL
+
+Construct the to URL to get by putting the source URL and query_string together.
+
+=cut
+
 sub query_URL {
     my $self = shift;
-
     return $self->source_URL . '?' . $self->query_string;
+}
+
+# Builders
+
+sub _build_data {
+    my $self = shift;
+
+    my $content = get( $self->query_URL );
+    die "Couldn't get URL: ", $self->query_URL unless defined $content;
+
+    my $data_href = decode_json($content);
+
+    return $data_href->{data};
+}
+
+sub current_conditons {
+    my $self = shift;
+    return $self->data->{current_condition};
+}
+
+sub weather_forecast {
+    my $self = shift;
+    return $self->data->{weather};
+}
+sub request {
+    my $self = shift;
+    return $self->data->{request};
+}
+
+sub _build_source_URL {
+    my $self = shift;
+    return 'http://www.worldweatheronline.com/feed/weather.ashx';
 }
 
 __PACKAGE__->meta->make_immutable;
 1
+
+__END__
+
+=head1 Authors
+
+Mateu Hunter C<hunter@missoula.org>
+
+=head1 Copyright
+
+Copyright 2010, Mateu Hunter
+
+=head1 License
+
+You may distribute this code under the same terms as Perl itself.
+
+=cut
