@@ -30,12 +30,6 @@ sub is_proper_location_type {
     }
 }
 
-=head2 is_lat_long_location
-
-See if the location passed is of the lat/long variety.
-
-=cut
-
 sub is_lat_long_location {
     my $location = shift;
 

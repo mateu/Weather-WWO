@@ -7,7 +7,7 @@ use JSON;
 
 use Data::Dumper::Concise;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 Name
 
@@ -15,18 +15,21 @@ Weather::WWO - API to World Weather Online
 
 =head1 Synopsis
 
-my $wwo = Weather::WWO->new( api_key           => $my_api_key,
-                             location          => $location,
-                             temperature_units => 'F',
-                             wind_units        => 'Miles');
-Where the $location can be:
-* zip code
-* IP address
-* latitude,longitude
+    Get the 5-day weather forecast:
+    
+    my $wwo = Weather::WWO->new( api_key           => $your_api_key,
+                                 location          => $location,
+                                 temperature_units => 'F',
+                                 wind_units        => 'Miles');
+                                 
+    Where the $location can be:
+    * zip code
+    * IP address
+    * latitude,longitude
+    
+    my ($highs, $lows) = $wwo->forecast_temperatures;
 
-my ($highs, $lows) = $wwo->forecast_temperatures;
-
-NOTE: api_key and location are required parameters to new()
+NOTE: I<api_key> and I<location> are required parameters to C<new()>
 
 =cut
 
@@ -83,6 +86,7 @@ after 'set_location' => sub {
     $self->clear_data;
 };
 
+=head1 Methods
 
 =head2 forecast_temperatures
 
@@ -142,6 +146,9 @@ sub winds {
 Get the values for a single forecast metric.
 Examples are: tempMinF, tempMaxC, windspeedMiles etc...
 
+NOTE: One can dump the data attribute to see 
+the exact data structure and keys available.
+
 =cut
 
 sub get_forecast_data_by_key {
@@ -184,6 +191,39 @@ sub query_URL {
     return $self->source_URL . '?' . $self->query_string;
 }
 
+=head2 current_conditions
+
+The current conditions data structure.
+
+=cut
+
+sub current_conditons {
+    my $self = shift;
+    return $self->data->{current_condition};
+}
+
+=head2 weather_forecast
+
+The weather forecast data structure.
+
+=cut
+
+sub weather_forecast {
+    my $self = shift;
+    return $self->data->{weather};
+}
+
+=head2 request
+
+Information about the request.
+
+=cut
+
+sub request {
+    my $self = shift;
+    return $self->data->{request};
+}
+
 # Builders
 
 sub _build_data {
@@ -195,20 +235,6 @@ sub _build_data {
     my $data_href = decode_json($content);
 
     return $data_href->{data};
-}
-
-sub current_conditons {
-    my $self = shift;
-    return $self->data->{current_condition};
-}
-
-sub weather_forecast {
-    my $self = shift;
-    return $self->data->{weather};
-}
-sub request {
-    my $self = shift;
-    return $self->data->{request};
 }
 
 sub _build_source_URL {
