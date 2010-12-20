@@ -10,11 +10,12 @@ license 'perl';
 version_from 'lib/Weather/WWO.pm';
 
 requires(
-    'Moose'                => '1.21',
-    'namespace::autoclean' => 0,
-    'LWP::Simple'          => 0,
-    'JSON'                 => 0,
-    'Regexp::Common'       => 0,
+    'Data::Dumper::Concise' => 0,
+    'JSON'                  => 0,
+    'LWP::Simple'           => 0,
+    'Moose'                 => '1.21',
+    'namespace::autoclean'  => 0,
+    'Regexp::Common'        => 0,
 );
 
 auto_install;
