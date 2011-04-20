@@ -7,7 +7,7 @@ use JSON;
 
 use Data::Dumper::Concise;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 =head1 Name
 
@@ -197,7 +197,7 @@ The current conditions data structure.
 
 =cut
 
-sub current_conditons {
+sub current_conditions {
     my $self = shift;
     return $self->data->{current_condition};
 }
@@ -239,7 +239,7 @@ sub _build_data {
 
 sub _build_source_URL {
     my $self = shift;
-    return 'http://www.worldweatheronline.com/feed/weather.ashx';
+    return 'http://free.worldweatheronline.com/feed/weather.ashx';
 }
 
 __PACKAGE__->meta->make_immutable;
