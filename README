@@ -1,5 +1,0 @@
-INSTALL:
-    perl Makefile.PL
-    make test
-    sudo make install
-    make clean

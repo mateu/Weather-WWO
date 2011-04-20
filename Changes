@@ -1,3 +1,10 @@
+0.04  2011-abril-19
+      Corrections:
+       -remove inc/ from distribution (srezic)
+
+      Updates:
+      - API source URL has changed to free.worldweatheronline.com
+
 0.03  2010-dec-21
       Address Tests:
       - add Data::Dumper::Concise dependencies.  This really doesn't have to be dep, 
