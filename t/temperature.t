@@ -49,7 +49,7 @@ sub BEGIN {
                 weatherIconUrl   => [
                     {
                         value =>
-                          "http://www.worldweatheronline.com/images/wsymbols01_png_64/wsymbol_0018_cloudy_with_heavy_rain.png"
+                          "http://free.worldweatheronline.com/images/wsymbols01_png_64/wsymbol_0018_cloudy_with_heavy_rain.png"
                     }
                 ],
                 winddir16Point => "SSW",
@@ -77,7 +77,7 @@ sub BEGIN {
                 weatherIconUrl => [
                     {
                         value =>
-                          "http://www.worldweatheronline.com/images/wsymbols01_png_64/wsymbol_0018_cloudy_with_heavy_rain.png"
+                          "http://free.worldweatheronline.com/images/wsymbols01_png_64/wsymbol_0018_cloudy_with_heavy_rain.png"
                     }
                 ],
                 winddir16Point => "SSW",
@@ -98,7 +98,7 @@ sub BEGIN {
                 weatherIconUrl => [
                     {
                         value =>
-                          "http://www.worldweatheronline.com/images/wsymbols01_png_64/wsymbol_0018_cloudy_with_heavy_rain.png"
+                          "http://free.worldweatheronline.com/images/wsymbols01_png_64/wsymbol_0018_cloudy_with_heavy_rain.png"
                     }
                 ],
                 winddir16Point => "WSW",
@@ -119,7 +119,7 @@ sub BEGIN {
                 weatherIconUrl => [
                     {
                         value =>
-                          "http://www.worldweatheronline.com/images/wsymbols01_png_64/wsymbol_0018_cloudy_with_heavy_rain.png"
+                          "http://free.worldweatheronline.com/images/wsymbols01_png_64/wsymbol_0018_cloudy_with_heavy_rain.png"
                     }
                 ],
                 winddir16Point => "E",
@@ -140,7 +140,7 @@ sub BEGIN {
                 weatherIconUrl => [
                     {
                         value =>
-                          "http://www.worldweatheronline.com/images/wsymbols01_png_64/wsymbol_0018_cloudy_with_heavy_rain.png"
+                          "http://free.worldweatheronline.com/images/wsymbols01_png_64/wsymbol_0018_cloudy_with_heavy_rain.png"
                     }
                 ],
                 winddir16Point => "S",
@@ -161,7 +161,7 @@ sub BEGIN {
                 weatherIconUrl => [
                     {
                         value =>
-                          "http://www.worldweatheronline.com/images/wsymbols01_png_64/wsymbol_0001_sunny.png"
+                          "http://free.worldweatheronline.com/images/wsymbols01_png_64/wsymbol_0001_sunny.png"
                     }
                 ],
                 winddir16Point => "NE",
