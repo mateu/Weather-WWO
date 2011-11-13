@@ -34,7 +34,9 @@ sub is_proper_location_type {
         return 'lat/long';
     }
     else {
-        return;
+        # We ought to be a City, Location set
+        # Proper verification would be very useful
+        return $location;
     }
 }
 
