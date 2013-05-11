@@ -1,3 +1,4 @@
+0.05  2013-maig-11
       - Allow one to use new API (use_new_api => 1)
       - Allow city names (thanks to fayland and TheSeparator)
       - Converted to Moo
@@ -21,3 +22,4 @@
 
 0.01  2010-dec-19
       - Initial Release
+
