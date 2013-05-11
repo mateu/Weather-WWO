@@ -1,13 +1,12 @@
 package Weather::WWO;
-use Moose;
-use namespace::autoclean;
-use Weather::WWO::Types;
+use Moo;
+use MooX::Types::MooseLike::Base qw/Str Int HashRef Bool/;
 use LWP::Simple;
 use JSON;
 
 use Data::Dumper::Concise;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 =head1 Name
 
@@ -18,6 +17,7 @@ Weather::WWO - API to World Weather Online
     Get the 5-day weather forecast:
     
     my $wwo = Weather::WWO->new( api_key           => $your_api_key,
+                                 use_new_api       => 1,
                                  location          => $location,
                                  temperature_units => 'F',
                                  wind_units        => 'Miles');
@@ -26,56 +26,63 @@ Weather::WWO - API to World Weather Online
     * zip code
     * IP address
     * latitude,longitude
-    
+    * City[,State] name
+
     my ($highs, $lows) = $wwo->forecast_temperatures;
 
 NOTE: I<api_key> and I<location> are required parameters to C<new()>
+As of May 2013 there is a new API that will replace the old.
+One can set use_new_api to 1 in the constructor to retrieve from the new api.
 
 =cut
 
 has 'api_key' => (
     is       => 'ro',
-    isa      => 'Str',
+    isa      => Str,
     required => 1,
 );
 has 'location' => (
     is       => 'rw',
-    isa      => 'Location',
+    isa      => Str,
     required => 1,
     writer   => 'set_location',
 );
 has 'num_of_days' => (
     is        => 'ro',
-    isa       => 'Int',
+    isa       => Int,
     'default' => 5,
 );
 
 # We are only using the JSON format
 has 'format' => (
     is        => 'ro',
-    isa       => 'Str',
+    isa       => Str,
     'default' => 'json',
     init_arg  => undef,
 );
 has 'temperature_units' => (
     is        => 'ro',
-    isa       => 'Str',
+    isa       => Str,
     'default' => 'C',
 );
 has 'wind_units' => (
     is        => 'ro',
-    isa       => 'Str',
+    isa       => Str,
     'default' => 'Kmph',
 );
 has 'data' => (
     is         => 'rw',
-    isa        => 'HashRef',
-    lazy_build => 1,
+    isa        => HashRef,
+    lazy       => 1,
+    builder    => '_build_data',
 );
 has 'source_URL' => (
-    is         => 'ro',
-    isa        => 'Any',
-    lazy_build => 1,
+    is         => 'lazy',
+    isa        => Str,
+);
+has 'use_new_api' => (
+    is         => 'lazy',
+    isa        => Bool,
 );
 
 # When the location changes, we want to clear the data to insure a new data fetch will happen.
@@ -232,17 +239,34 @@ sub _build_data {
     my $content = get( $self->query_URL );
     die "Couldn't get URL: ", $self->query_URL unless defined $content;
 
-    my $data_href = decode_json($content);
+    my $data = decode_json($content);
+    # Are there any errors?
+    if (my $errors = $data->{data}->{error}) {
+        foreach my $error (@{$errors}) {
+            warn $error->{msg};
+        }
+        die "Error: Can not get data for location: ", $self->location;
+    }
 
-    return $data_href->{data};
+    return $data->{data};
 }
 
+sub _build_use_new_api {
+    return 0;
+}
+
+# We currently have two different APIs to choose from
+# According to WWO, the old API will only work through 31 August 2013
 sub _build_source_URL {
     my $self = shift;
-    return 'http://free.worldweatheronline.com/feed/weather.ashx';
+    if ($self->use_new_api) {
+        return 'http://api.worldweatheronline.com/free/v1/weather.ashx';
+    }
+    else {
+        return 'http://free.worldweatheronline.com/feed/weather.ashx';
+    }
 }
 
-__PACKAGE__->meta->make_immutable;
 1
 
 __END__
@@ -253,7 +277,7 @@ Mateu Hunter C<hunter@missoula.org>
 
 =head1 Copyright
 
-Copyright 2010, Mateu Hunter
+Copyright 2010, 2011, 2013 Mateu Hunter
 
 =head1 License
 

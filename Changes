@@ -1,3 +1,7 @@
+      - Allow one to use new API (use_new_api => 1)
+      - Allow city names (thanks to fayland and TheSeparator)
+      - Converted to Moo
+
 0.04  2011-abril-19
       Corrections:
        -remove inc/ from distribution (srezic)
