@@ -1,3 +1,4 @@
+use strictures;
 package Weather::WWO;
 use Moo;
 use MooX::Types::MooseLike::Base qw/Str Int HashRef Bool/;
