@@ -51,25 +51,25 @@ has 'location' => (
 has 'num_of_days' => (
     is        => 'ro',
     isa       => Int,
-    'default' => 5,
+    default => sub { 5 },
 );
 
 # We are only using the JSON format
 has 'format' => (
     is        => 'ro',
     isa       => Str,
-    'default' => 'json',
+    default => sub { 'json' },
     init_arg  => undef,
 );
 has 'temperature_units' => (
     is        => 'ro',
     isa       => Str,
-    'default' => 'C',
+    default => sub { 'C' },
 );
 has 'wind_units' => (
     is        => 'ro',
     isa       => Str,
-    'default' => 'Kmph',
+    default => sub { 'Kmph' },
 );
 has 'data' => (
     is         => 'rw',
