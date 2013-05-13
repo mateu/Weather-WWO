@@ -1,3 +1,6 @@
+0.06  2013-maig-13
+      - Fix default to coderef style
+
 0.05  2013-maig-11
       - Allow one to use new API (use_new_api => 1)
       - Allow city names (thanks to fayland and TheSeparator)
