@@ -1,3 +1,7 @@
+0.07  2013-juliol-3
+      - Correct version number in Weather::WWO
+      - Simplify dependencies
+
 0.06  2013-maig-13
       - Fix default to coderef style
 

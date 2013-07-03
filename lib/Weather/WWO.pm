@@ -2,12 +2,10 @@ use strictures;
 package Weather::WWO;
 use Moo;
 use MooX::Types::MooseLike::Base qw/Str Int HashRef Bool/;
-use LWP::Simple;
+use HTTP::Tiny;
 use JSON;
 
-use Data::Dumper::Concise;
-
-our $VERSION = '0.05';
+our $VERSION = '0.07';
 
 =head1 Name
 
@@ -237,8 +235,11 @@ sub request {
 sub _build_data {
     my $self = shift;
 
-    my $content = get( $self->query_URL );
-    die "Couldn't get URL: ", $self->query_URL unless defined $content;
+    my $URL = $self->query_URL;
+    my $response = HTTP::Tiny->new->get($URL);
+    die "Failed to get $URL\n" unless $response->{success};
+    my $content = $response->{content};
+    die "No content for $URL\n" unless defined $content;
 
     my $data = decode_json($content);
     # Are there any errors?

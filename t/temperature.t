@@ -2,7 +2,6 @@ use strict;
 use warnings;
 use Test::More;
 use Weather::WWO;
-use Data::Dumper::Concise;
 
 my $data;
 my $location = '90230';
