@@ -3,3 +3,4 @@
 .project
 .includepath
 Weather-WWO*
+t/real-api-key.t
